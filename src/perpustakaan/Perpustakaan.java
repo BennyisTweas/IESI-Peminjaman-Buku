@@ -15,12 +15,12 @@ public class Perpustakaan {
     public static FormPeminjaman formPeminjaman;
     public static DialogUI dialogUI;
     public static BukuProvider bukuProvider;
+    public static PeminjamanManager peminjamanManager;
     
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        
         // create new Home
         Perpustakaan.halamanUtamaUI = new HalamanUtamaUI();
         
