@@ -15,7 +15,7 @@ public class Perpustakaan {
     public static FormPeminjaman formPeminjaman;
     public static DialogUI dialogUI;
     public static BukuProvider bukuProvider;
-    public static PeminjamanManager peminjamanManager;
+    public static PeminjamanManager peminjamanManager = new PeminjamanManager();
     
     /**
      * @param args the command line arguments

@@ -39,6 +39,6 @@ public class PeminjamanController {
     }
 
     public void pinjam(BukuDipinjam[] bukuDipinjam) {
-        Perpustakaan.peminjamanManager.save(bukuDipinjam);
+        boolean isSuccess = Perpustakaan.peminjamanManager.save(bukuDipinjam);
     }
 }
