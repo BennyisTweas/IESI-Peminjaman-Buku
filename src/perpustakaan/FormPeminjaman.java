@@ -6,7 +6,10 @@
 package perpustakaan;
 
 import java.util.ArrayList;
+import javax.accessibility.AccessibleRole;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -14,6 +17,12 @@ import javax.swing.table.DefaultTableModel;
  * @author VivoBook
  */
 public class FormPeminjaman extends javax.swing.JFrame {
+    
+    private int borrowedDuration = -1;
+    Object[] kolom = { "Judul" };
+    DefaultTableModel model = new DefaultTableModel(kolom, 0);
+    
+    ArrayList<BukuDipinjam> bukuDipinjamCollection;
 
     /**
      * Creates new form FormPeminjaman
@@ -65,6 +74,11 @@ public class FormPeminjaman extends javax.swing.JFrame {
 
             }
         ));
+        jtBukuCari.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jtBukuCariMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(jtBukuCari);
 
         jButtonTambah.setText("Tambah");
@@ -75,6 +89,11 @@ public class FormPeminjaman extends javax.swing.JFrame {
         });
 
         jButtonBatal.setText("Batal");
+        jButtonBatal.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jButtonBatalMouseClicked(evt);
+            }
+        });
 
         jtBukuPinjam.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -84,6 +103,11 @@ public class FormPeminjaman extends javax.swing.JFrame {
 
             }
         ));
+        jtBukuPinjam.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                jtBukuPinjamMouseClicked(evt);
+            }
+        });
         jScrollPane2.setViewportView(jtBukuPinjam);
 
         jButtonKonfirmasi.setText("Konfirmasi");
@@ -142,6 +166,9 @@ public class FormPeminjaman extends javax.swing.JFrame {
 
     private void jButtonTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonTambahActionPerformed
         // TODO add your handling code here:
+        int row = jtBukuCari.getSelectedRow();
+        Buku buku = (Buku) jtBukuCari.getModel().getValueAt(row, 0);
+        tambahBuku(buku, borrowedDuration);
     }//GEN-LAST:event_jButtonTambahActionPerformed
 
     private void jButtonCariMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonCariMouseClicked
@@ -150,17 +177,91 @@ public class FormPeminjaman extends javax.swing.JFrame {
         Perpustakaan.controllerPeminjaman.cariBuku(judul);
     }//GEN-LAST:event_jButtonCariMouseClicked
 
+    private void jtBukuCariMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jtBukuCariMouseClicked
+        // TODO add your handling code here:
+        JTable source = (JTable)evt.getSource();
+        int row = source.rowAtPoint( evt.getPoint() );
+        int column = source.columnAtPoint( evt.getPoint() );
+        
+        // Check if a valid cell is clicked
+        if (row >= 0 && column >= 0) {
+            // Prompt the user to enter how long the book will be borrowed
+            String input = JOptionPane.showInputDialog(
+                this, 
+                "Enter the duration for borrowing the book (in days):", 
+                "Borrow Duration", 
+                JOptionPane.QUESTION_MESSAGE
+            );
+
+            // Check if the user provided input
+            if (input != null && !input.isEmpty()) {
+                try {
+                    int duration = Integer.parseInt(input);
+                    borrowedDuration = duration;
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(
+                        this,
+                        "Invalid input. Please enter a valid number.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE
+                    );
+                }
+            }
+        }
+    }//GEN-LAST:event_jtBukuCariMouseClicked
+
+    private void jtBukuPinjamMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jtBukuPinjamMouseClicked
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jtBukuPinjamMouseClicked
+
+    private void jButtonBatalMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButtonBatalMouseClicked
+        // TODO add your handling code here:
+        int row = jtBukuPinjam.getSelectedRow();
+        Buku buku = (Buku) jtBukuPinjam.getModel().getValueAt(row, 0);
+        hapusBuku(buku);
+    }//GEN-LAST:event_jButtonBatalMouseClicked
+
+    public void tambahBuku(Buku buku, int lama) {
+        bukuDipinjamCollection = new ArrayList<>();
+        BukuDipinjam bukuDipinjam = new BukuDipinjam(buku.judul, lama);
+        
+        // Set the judul and lama properties from the provided Buku and lama values
+        bukuDipinjam.judul = buku.judul;
+        bukuDipinjam.lama = lama;
+
+        // Add the BukuDipinjam object to the collection
+        bukuDipinjamCollection.add(bukuDipinjam);
+        tampilPinjaman(bukuDipinjamCollection);
+    }
+    
+    public void hapusBuku(Buku buku) {
+        for (BukuDipinjam bukuDipinjam : bukuDipinjamCollection) {
+            if (bukuDipinjam.judul == buku.judul) {
+                bukuDipinjamCollection.remove(bukuDipinjam);
+                break;
+            }
+        }
+    }
     
     public void display(ArrayList<Buku> bukuList) {
         Object[] kolom = { "Judul" };
-        DefaultTableModel model = new DefaultTableModel(kolom, 0);
+        DefaultTableModel tabelCari = new DefaultTableModel(kolom, 0);
         
+        for(Buku buku : bukuList) {
+            Object[] baris = { buku.judul };
+            tabelCari.addRow(baris);
+        }
+        
+        jtBukuCari.setModel(tabelCari);
+    }
+    
+    public void tampilPinjaman(ArrayList<BukuDipinjam> bukuList) {
         for(Buku buku : bukuList) {
             Object[] baris = { buku.judul };
             model.addRow(baris);
         }
         
-        jtBukuCari.setModel(model);
+        jtBukuPinjam.setModel(model);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
